@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Feeder Trener PRO v4.7 - Mistrzostwa Polski U20</title>
+    <title>Feeder Trener PRO v4.8 - Mistrzostwa Polski U20</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -68,23 +67,22 @@
         .action-btn { padding: 14px; font-size: 12px; font-weight: 800; border: none; border-radius: var(--border-radius); cursor: pointer; color: white; text-align: center; display: flex; align-items: center; justify-content: center; text-transform: uppercase; }
         .messenger-btn { background: linear-gradient(135deg, #006aff, #00b2fe); grid-column: span 2; font-size: 13px; }
         .gemini-btn { background: linear-gradient(135deg, #7c3aed, #4c1d95); }
-        .pdf-btn { background: linear-gradient(135deg, #e11d48, #9f1239); }
+        .pdf-btn { background: linear-gradient(135deg, #047857, #064e3b); } /* Zmieniony kolor dla przycisku TXT na zielony */
         .clear-btn { background-color: transparent; border: 1px solid rgba(239,68,68,0.4); color: #ef4444; grid-column: span 2; padding: 8px; font-size: 10px; font-weight: bold; }
         .dashboard-section { background: var(--card-bg); border-radius: var(--border-radius); padding: 12px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .chart-container { position: relative; width: 100%; height: 210px; margin-top: 6px; }
         .log-box { background-color: #020617; border-radius: 10px; padding: 8px; max-height: 120px; overflow-y: auto; font-family: monospace; font-size: 10px; color: #38bdf8; margin-top: 6px; }
         .log-entry { margin-bottom: 3px; border-bottom: 1px dashed #1e293b; padding-bottom: 3px; }
         
-        /* Zmieniony z-index aby modal był zawsze na samej górze */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 999999; justify-content: center; align-items: center; padding: 15px; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; padding: 15px; }
         .modal-box { background-color: #1e293b; border-radius: var(--border-radius); width: 100%; max-width: 450px; padding: 16px; border: 2px solid var(--accent-color); display: flex; flex-direction: column; }
         .modal-textarea { width: 100%; height: 180px; background-color: #020617; color: #fff; border: 1px solid #475569; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 11px; resize: none; user-select: text!important; -webkit-user-select: text!important; }
         .modal-close-btn { background: linear-gradient(135deg, #f59e0b, #d97706); color: #020617; border: none; padding: 10px; font-weight: 900; border-radius: 8px; margin-top: 10px; cursor: pointer; text-transform: uppercase; }
     </style>
 </head>
 <body>
-    <div id="pdf-container">
-        <header><h1>🏆 Feeder Trener PRO v4.7 – PANEL SEKTOROWY</h1></header>
+    <div id="app-container">
+        <header><h1>🏆 Feeder Trener PRO v4.8 – PANEL SEKTOROWY</h1></header>
         <div class="meta-panel">
             <input type="text" id="meta-sector" value="Sektor A">
             <input type="text" id="meta-stan" value="Stanowisko 15">
@@ -132,6 +130,7 @@
                 </div>
                 <div class="note-area"><input type="text" id="left-note-input" placeholder="Notatka..."><button onclick="saveCustomNote('left')">OK</button></div>
             </div>
+
             <div class="sector-column me">
                 <div class="column-header">ZAWODNICZKA</div>
                 <div class="counter-section">
@@ -163,6 +162,7 @@
                 </div>
                 <div class="note-area"><input type="text" id="me-note-input" placeholder="Notatka..."><button onclick="saveCustomNote('me')">OK</button></div>
             </div>
+
             <div class="sector-column right">
                 <div class="column-header">Sąsiad PRAWY</div>
                 <div class="counter-section">
@@ -195,20 +195,23 @@
                 <div class="note-area"><input type="text" id="right-note-input" placeholder="Notatka..."><button onclick="saveCustomNote('right')">OK</button></div>
             </div>
         </div>
+
         <div class="dashboard-section" id="chart-card-wrapper">
             <div class="section-title" style="color: var(--accent-color); font-size: 11px;">📊 Przebieg tury w czasie</div>
             <div class="chart-container"><canvas id="fishChart"></canvas></div>
         </div>
     </div>
+
     <div class="action-container">
         <button class="action-btn messenger-btn" onclick="generateMessengerRaport()">💬 POBIERZ RAPORT NA MESSENGERA</button>
         <button class="action-btn gemini-btn" onclick="exportToGemini()">🤖 EKSPORT LOGÓW DO GEMINI</button>
-        <button class="action-btn pdf-btn" onclick="generatePDF()">📄 POBIERZ RAPORT KOŃCOWY PDF</button>
+        <button class="action-btn pdf-btn" onclick="generateTXT()">📝 POBIERZ RAPORT KOŃCOWY (.TXT)</button>
         <button class="action-btn clear-btn" onclick="resetData()">🗑️ CZYSZCZENIE I RESET TURY</button>
     </div>
+
     <div class="dashboard-section">
         <div class="section-title" style="color: var(--accent-color); font-size: 11px;">📋 Ostatnie logi zdarzeń</div>
-        <div class="log-box" id="log-box-container"><div class="log-entry">System gotowy. Wersja 4.7 Aktywna.</div></div>
+        <div class="log-box" id="log-box-container"><div class="log-entry">System gotowy. Wersja 4.8 TXT Aktywna.</div></div>
     </div>
 
     <div class="modal-overlay" id="copyModal">
@@ -236,12 +239,14 @@
                 initChart();
             } catch(e) { console.error('Błąd inicjalizacji: ', e); }
         };
+
         function getTimestamp() { return new Date().toTimeString().split(' ')[0]; }
         function saveData() { localStorage.setItem('mp_u20_v4_store', JSON.stringify(dataStore)); updateChart(); }
         function addLog(text) {
             const container = document.getElementById('log-box-container'); const entry = document.createElement('div'); entry.className = 'log-entry';
             entry.innerText = '[' + getTimestamp() + '] ' + text; container.insertBefore(entry, container.firstChild);
         }
+
         async function requestWakeLock() { try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); } } catch (err) {} }
         function releaseWakeLock() { if (wakeLock !== null) { wakeLock.release(); wakeLock = null; } }
         
@@ -263,6 +268,7 @@
                 }, 1000);
             }
         }
+
         function addFish(comp) {
             dataStore[comp].fishCount++; dataStore[comp].events.push({ time: getTimestamp(), type: 'RYBA', count: dataStore[comp].fishCount, method: dataStore[comp].currentMethod, rawTime: Date.now() });
             addLog((comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy')) + ': +1 ryba (Razem: ' + dataStore[comp].fishCount + ')');
@@ -289,6 +295,7 @@
             dataStore[comp].events.push({ time: getTimestamp(), type: 'NOTATKA', value: input.value, count: dataStore[comp].fishCount, rawTime: Date.now() });
             addLog((comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy')) + ': [Notatka] ' + input.value); input.value = ''; saveData();
         }
+
         function recalculateAllStats() {
             let avgWeightG = parseFloat(document.getElementById('avg-weight-input').value) || 200;
             let counts = [{ id: 'left', count: dataStore.left.fishCount }, { id: 'me', count: dataStore.me.fishCount }, { id: 'right', count: dataStore.right.fishCount }];
@@ -318,6 +325,7 @@
                 document.getElementById(comp + '-stat-method').innerText = bestMethod !== 'Brak' ? bestMethod + ' (' + maxFish + ')' : 'Brak';
             });
         }
+
         function updateUI() {
             document.getElementById('left-fish-count').innerText = dataStore.left.fishCount; document.getElementById('me-fish-count').innerText = dataStore.me.fishCount; document.getElementById('right-fish-count').innerText = dataStore.right.fishCount;
             ['left', 'me', 'right'].forEach(comp => {
@@ -345,13 +353,13 @@
             try {
                 let s = document.getElementById('meta-sector').value || '';
                 let st = document.getElementById('meta-stan').value || '';
-                let txt = '📊 RAPORT | Sektor: ' + s + ' | Stan. ' + st + '\\n';
-                txt += '-------------------------\\n';
+                let txt = '📊 RAPORT | Sektor: ' + s + ' | Stan. ' + st + '\n';
+                txt += '-------------------------\n';
                 ['left', 'me', 'right'].forEach(c => {
                     let n = c === 'left' ? '⬅️ LEWY: ' : (c === 'me' ? '👧 JA: ' : '➡️ PRAWY: ');
                     let b = document.getElementById(c + '-position-badge') ? document.getElementById(c + '-position-badge').innerText : '';
                     let p = document.getElementById(c + '-stat-prog') ? document.getElementById(c + '-stat-prog').innerText : '';
-                    txt += n + dataStore[c].fishCount + ' szt. | ' + b + ' | Prog: ' + p + '\\n';
+                    txt += n + dataStore[c].fishCount + ' szt. | ' + b + ' | Prog: ' + p + '\n';
                 });
                 txt += '-------------------------';
                 showCopyModal('💬 Kopiuj raport na Messengera', txt);
@@ -362,14 +370,14 @@
             try {
                 let s = document.getElementById('meta-sector').value || '';
                 let st = document.getElementById('meta-stan').value || '';
-                let output = 'Cześć Gemini, przeanalizuj przebieg tury.\\nSektor: ' + s + ', Stanowisko: ' + st + '\\n\\n';
+                let output = 'Cześć Gemini, przeanalizuj przebieg tury.\nSektor: ' + s + ', Stanowisko: ' + st + '\n\n';
                 ['left', 'me', 'right'].forEach(c => {
-                    output += '\\n[LOGI DLA: ' + c.toUpperCase() + ']\\n';
-                    if(!dataStore[c].events || dataStore[c].events.length === 0) { output += 'Brak.\\n'; }
+                    output += '\n[LOGI DLA: ' + c.toUpperCase() + ']\n';
+                    if(!dataStore[c].events || dataStore[c].events.length === 0) { output += 'Brak.\n'; }
                     else {
                         dataStore[c].events.forEach(ev => {
                             let v = ev.value || ev.method || '';
-                            output += ev.time + ' - Typ: ' + ev.type + ' | Info: ' + v + ' | Stan: ' + ev.count + '\\n';
+                            output += ev.time + ' - Typ: ' + ev.type + ' | Info: ' + v + ' | Stan: ' + ev.count + '\n';
                         });
                     }
                 });
@@ -377,46 +385,59 @@
             } catch (err) { alert('Błąd Gemini: ' + err.message); }
         }
         
-        function generatePDF() {
+        /* ---------------- GENEROWANIE CZYSTEGO PLIKU TXT ZAMIAST PDF ---------------- */
+        function generateTXT() {
             try {
-                addLog('Budowanie raportu PDF...');
-                let html = '<div style="padding:20px; background:#fff; color:#000; font-family:Arial, sans-serif;">';
-                html += '<h1 style="text-align:center; margin-bottom:20px; color:#000;">🏆 RAPORT TRENERA - MP U20</h1>';
-                html += '<p style="color:#000;"><strong>Sektor:</strong> ' + document.getElementById('meta-sector').value + ' | <strong>Stanowisko:</strong> ' + document.getElementById('meta-stan').value + '</p><br>';
-                html += '<table border="1" cellpadding="8" style="width:100%; border-collapse:collapse; text-align:center; margin-bottom:20px; color:#000; border-color:#000;">';
-                html += '<tr style="background:#e2e8f0; color:#000;"><th>Zawodnik</th><th>Wynik (szt)</th><th>Najlepsza metoda</th><th>Średnie tempo</th><th>Prognoza wagi</th></tr>';
+                addLog('Generowanie raportu tekstowego...');
                 
+                let s = document.getElementById('meta-sector').value || 'Nieznany';
+                let st = document.getElementById('meta-stan').value || 'Nieznane';
+                
+                let txt = "========================================\n";
+                txt += "🏆 RAPORT TRENERA - MP U20\n";
+                txt += "========================================\n";
+                txt += "Sektor: " + s + " | Stanowisko: " + st + "\n";
+                txt += "Data wygenerowania: " + new Date().toLocaleString('pl-PL') + "\n\n";
+
+                txt += "[WYNIKI KOŃCOWE]\n";
+                txt += "----------------------------------------\n";
                 ['left', 'me', 'right'].forEach(c => {
                     let name = c==='left'?'Sąsiad Lewy':(c==='me'?'ZAWODNICZKA':'Sąsiad Prawy');
+                    let count = dataStore[c].fishCount;
                     let method = document.getElementById(c+'-stat-method') ? document.getElementById(c+'-stat-method').innerText : '-';
                     let tempo = document.getElementById(c+'-stat-tempo') ? document.getElementById(c+'-stat-tempo').innerText : '-';
                     let weight = document.getElementById(c+'-stat-weight') ? document.getElementById(c+'-stat-weight').innerText : '-';
-                    html += '<tr><td style="color:#000;">' + name + '</td><td style="color:#000;"><strong>' + dataStore[c].fishCount + '</strong></td><td style="color:#000;">' + method + '</td><td style="color:#000;">' + tempo + '</td><td style="color:#000;">' + weight + '</td></tr>';
+                    
+                    txt += name + " | " + count + " szt. | Naj: " + method + " | Tempo: " + tempo + " | Prog. Waga: " + weight + "\n";
                 });
-                
-                html += '</table><br><h3 style="color:#000;">📋 Chronologiczny log zdarzeń:</h3><div style="font-family:monospace; font-size:12px; color:#000; line-height:1.5;">';
+
+                txt += "\n[CHRONOLOGICZNY LOG ZDARZEŃ]\n";
+                txt += "----------------------------------------\n";
                 let allLogs = [];
                 ['left', 'me', 'right'].forEach(c => { 
                     if(dataStore[c].events) {
                         dataStore[c].events.forEach(e => { 
-                            allLogs.push({ time: e.time, text: (c==='left'?'Lewy':(c==='me'?'JA':'Prawy')) + ': ' + e.type + ' ' + (e.value || e.method || '') + ' (Stan: ' + e.count + ')' }); 
+                            let name = c==='left'?'Lewy':(c==='me'?'JA':'Prawy');
+                            let info = e.value || e.method || '';
+                            allLogs.push({ time: e.time, text: name + ": " + e.type + " " + info + " (Stan ryb: " + e.count + ")" }); 
                         }); 
                     }
                 });
+                
                 allLogs.sort((a,b) => a.time.localeCompare(b.time));
-                allLogs.forEach(l => { html += '[' + l.time + '] ' + l.text + '<br>'; });
-                html += '</div></div>';
+                allLogs.forEach(l => { txt += "[" + l.time + "] " + l.text + "\n"; });
+
+                // Tworzenie i pobieranie pliku TXT
+                const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = "Raport_Tura_" + s.replace(/[^a-zA-Z0-9]/g, "_") + ".txt";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
                 
-                const opt = { 
-                    margin: 10, 
-                    filename: 'Raport_Tura_' + document.getElementById('meta-sector').value + '.pdf', 
-                    image: { type: 'jpeg', quality: 0.98 }, 
-                    html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true }, 
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-                };
-                
-                html2pdf().set(opt).from(html).save().then(() => { addLog('Plik PDF pobrany pomyślnie.'); }).catch(err => { alert('Błąd PDF: ' + err.message); });
-            } catch(e) { alert('Ogólny błąd PDF: ' + e.message); }
+                addLog('Plik TXT pobrany pomyślnie.');
+            } catch(e) { alert('Ogólny błąd funkcji TXT: ' + e.message); }
         }
         
         function resetData() {

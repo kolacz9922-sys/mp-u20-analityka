@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Feeder Trener PRO v4.0 - Sztab Szkoleniowy</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --left-color: #ef4444;
+            --me-color: #10b981;
+            --right-color: #3b82f6;
+            --accent-color: #f59e0b;
+            --border-radius: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #020617);
+            color: var(--text-color);
+            padding: 10px;
+            padding-bottom: 40px;
+            min-height: 100vh;
+        }
+        
+        header {
+            text-align: center; margin-bottom: 10px;
+            background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.9));
+            padding: 10px; border-radius: var(--border-radius);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        header h1 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-color); font-weight: 800; }
+        
+        .meta-panel {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px;
+            background: var(--card-bg); padding: 8px; border-radius: var(--border-radius);
+            border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(8px);
+        }
+        .meta-panel input {
+            background-color: #020617; border: 1px solid #334155; color: white; padding: 6px;
+            border-radius: 8px; font-size: 11px; text-align: center; user-select: text; -webkit-user-select: text;
+        }
+        
+        .timer-section {
+            grid-column: span 2; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(2,6,23,0.8); padding: 10px; border-radius: 10px; margin-top: 4px;
+            border: 1px solid rgba(245,158,11,0.2);
+        }
+        .timer-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706); color: #020617; border: none; 
+            padding: 8px 14px; font-weight: 800; font-size: 11px; border-radius: 6px; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .timer-display-wrapper { display: flex; flex-direction: column; align-items: flex-end; }
+        .timer-display { font-family: monospace; font-size: 18px; font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        .progress-bar-bg { width: 120px; height: 4px; background: #1e293b; border-radius: 2px; margin-top: 3px; overflow: hidden; }
+        .progress-bar-fill { width: 100%; height: 100%; background: var(--accent-color); transition: width 1s linear; }
+
+        .weight-input-box {
+            grid-column: span 2; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(15,23,42,0.5); padding: 6px 10px; border-radius: 8px; margin-top: 2px; font-size: 11px;
+        }
+        .weight-input-box input { width: 70px; padding: 3px; font-size: 11px; }
+
+        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+        .sector-column {
+            background: var(--card-bg); border-radius: var(--border-radius); padding: 6px;
+            display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3); position: relative; overflow: hidden;
+        }
+        
+        .sector-column::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+        }
+        .sector-column.left::before { background: var(--left-color); }
+        .sector-column.me::before { background: var(--me-color); box-shadow: 0 0 12px var(--me-color); }
+        .sector-column.right::before { background: var(--right-color); }
+
+        .column-header { text-align: center; font-weight: 800; font-size: 11px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .left .column-header { color: var(--left-color); }
+        .me .column-header { color: var(--me-color); }
+        .right .column-header { color: var(--right-color); }
+
+        .counter-section { text-align: center; margin-bottom: 6px; background: rgba(0,0,0,0.4); padding: 6px 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.03); }
+        .fish-display { font-size: 56px; font-weight: 900; font-family: monospace; color: #fff; line-height: 1; margin-bottom: 2px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        
+        .live-position-badge {
+            font-size: 9px; font-weight: 800; padding: 2px 4px; border-radius: 4px; display: inline-block; margin-top: 2px; text-transform: uppercase;
+        }
+        .me .live-position-badge { background: rgba(16,185,129,0.2); color: var(--me-color); border: 1px solid rgba(16,185,129,0.3); }
+        .left .live-position-badge { background: rgba(239,68,68,0.15); color: #f87171; }
+        .right .live-position-badge { background: rgba(59,130,246,0.15); color: #60a5fa; }
+
+        .counter-btn {
+            width: 100%; padding: 14px 0; font-size: 15px; font-weight: 900; border: none;
+            border-radius: 10px; color: white; cursor: pointer; text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.05s;
+        }
+        .counter-btn:active { transform: scale(0.97); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .left .counter-btn { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+        .me .counter-btn { background: linear-gradient(135deg, #10b981, #047857); }
+        .right .counter-btn { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .minus-btn { background: #334155 !important; font-size: 10px; padding: 5px 0; margin-top: 5px; box-shadow: none; opacity: 0.7; font-weight: bold; }
+
+        .live-stats { background: rgba(2,6,23,0.5); padding: 5px; border-radius: 8px; margin-bottom: 6px; font-size: 9px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.02); }
+        .live-stats div { margin-bottom: 3px; display: flex; justify-content: space-between; }
+        .live-stats span { font-family: monospace; font-weight: bold; color: #fff; }
+
+        .section-title { font-size: 9px; color: var(--text-muted); text-transform: uppercase; margin: 5px 0 3px 0; font-weight: 800; letter-spacing: 0.5px; }
+        .quick-buttons { display: grid; grid-template-columns: 1fr; gap: 3px; }
+        
+        .method-btn, .bait-btn {
+            background-color: rgba(51,65,85,0.5); color: #cbd5e1; border: 1px solid rgba(71,85,105,0.5);
+            padding: 6px 2px; font-size: 10px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: all 0.1s;
+        }
+        .method-btn.active { background: linear-gradient(135deg, #f59e0b, #d97706); color: #020617; border-color: #fbbf24; font-weight: 800; box-shadow: 0 0 8px rgba(245,158,11,0.4); }
+        .bait-btn:active { background-color: #475569; }
+
+        .note-area { display: flex; margin-top: 6px; gap: 2px; }
+        .note-area input {
+            width: 100%; background: #020617; border: 1px solid #334155; color: #fff;
+            padding: 5px; font-size: 10px; border-radius: 5px; user-select: text; -webkit-user-select: text;
+        }
+        .note-area button { background: #475569; color: white; border: none; padding: 0 6px; font-size: 10px; border-radius: 5px; font-weight: bold; }
+
+        .action-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .action-btn {
+            padding: 14px; font-size: 12px; font-weight: 800; border: none; border-radius: var(--border-radius);
+            cursor: pointer; color: white; text-align: center; display: flex; align-items: center; justify-content: center;
+            text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .messenger-btn { background: linear-gradient(135deg, #006aff, #00b2fe); grid-column: span 2; font-size: 13px; }
+        .gemini-btn { background: linear-gradient(135deg, #7c3aed, #4c1d95); }
+        .pdf-btn { background: linear-gradient(135deg, #e11d48, #9f1239); }
+        .clear-btn { background-color: transparent; border: 1px solid rgba(239,68,68,0.4); color: #ef4444; grid-column: span 2; padding: 8px; font-size: 10px; font-weight: bold; margin-top: 4px; }
+
+        .dashboard-section { background: var(--card-bg); border-radius: var(--border-radius); padding: 12px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .chart-container { position: relative; width: 100%; height: 210px; margin-top: 6px; }
+        
+        .log-box {
+            background-color: #020617; border-radius: 10px; padding: 8px; max-height: 120px;
+            overflow-y: auto; font-family: monospace; font-size: 10px; color: #38bdf8; margin-top: 6px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .log-entry { margin-bottom: 3px; border-bottom: 1px dashed #1e293b; padding-bottom: 3px; }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; padding: 15px;
+        }
+        .modal-box {
+            background-color: #1e293b; border-radius: var(--border-radius); width: 100%; max-width: 450px;
+            padding: 16px; border: 2px solid var(--accent-color); display: flex; flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+        .modal-textarea {
+            width: 100%; height: 180px; background-color: #020617; color: #fff; border: 1px solid #475569;
+            border-radius: 8px; padding: 10px; font-family: monospace; font-size: 11px; resize: none; user-select: text!important; -webkit-user-select: text!important;
+        }
+        .modal-close-btn { background: linear-gradient(135deg, #f59e0b, #d97706); color: #020617; border: none; padding: 10px; font-weight: 900; border-radius: 8px; margin-top: 10px; cursor: pointer; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <div id="pdf-container">
+        <header>
+            <h1>🏆 Feeder Trener PRO v4.0 – ANALITYKA LIVE</h1>
+        </header>
+
+        <div class="meta-panel">
+            <input type="text" id="meta-sector" value="Sektor A">
+            <input type="text" id="meta-stan" value="Stanowisko 15">
+            
+            <div class="weight-input-box">
+                <label>Śr. waga ryby (g):</label>
+                <input type="number" id="avg-weight-input" value="200" onchange="recalculateAllStats()" style="user-select: text; -webkit-user-select: text;">
+            </div>
+
+            <div class="timer-section">
+                <button class="timer-btn" id="timer-trigger-btn" onclick="toggleRaceTimers()">▶️ START TURY (4H)</button>
+                <div class="timer-display-wrapper">
+                    <div class="timer-display" id="race-timer-text">04:00:00</div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" id="timer-progress-fill"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <!-- LEWY SĄSIAD -->
+            <div class="sector-column left">
+                <div class="column-header">Sąsiad LEWY</div>
+                <div class="counter-section">
+                    <div class="fish-display" id="left-fish-count">0</div>
+                    <div class="live-position-badge" id="left-position-badge">-</div>
+                    <button class="counter-btn" onclick="addFish('left')">+ RYBA</button>
+                    <button class="counter-btn minus-btn" onclick="removeFish('left')">Cofnij (-1)</button>
+                </div>
+                
+                <div class="live-stats">
+                    <div>Tempo: <span id="left-stat-tempo">0s</span></div>
+                    <div>🎯 Naj: <span id="left-stat-method">Brak</span></div>
+                    <div>🔮 Prognoza: <span id="left-stat-prog">0 szt.</span></div>
+                    <div>⚖️ Waga (p): <span id="left-stat-weight">0.00 kg</span></div>
+                </div>
+
+                <div class="section-title">Metoda</div>
+                <div class="quick-buttons">
+                    <button class="method-btn left-method" id="left-m-tyczka" onclick="setMethod('left', 'Tyczka')">Tyczka</button>
+                    <button class="method-btn left-method" id="left-m-bat" onclick="setMethod('left', 'Bat')">Bat</button>
+                    <button class="method-btn left-method" id="left-m-odleglosc" onclick="setMethod('left', 'Odległość')">Odległość</button>
+                    <button class="method-btn left-method" id="left-m-ukleja" onclick="setMethod('left', 'Uklejówka')">Ukleja</button>
+                </div>
+                <div class="section-title">Nęcenie</div>
+                <div class="quick-buttons">
+                    <button class="bait-btn" onclick="logBait('left', 'Kubek')">🥣 Kubek</button>
+                    <button class="bait-btn" onclick="logBait('left', 'Z ręki')">✋ Z ręki</button>
+                    <button class="bait-btn" onclick="logBait('left', 'Proca')">🏹 Proca</button>
+                    <button class="bait-btn" onclick="logBait('left', 'Robak luźny')">🐛 Robak</button>
+                    <button class="bait-btn" onclick="logBait('left', 'Seria')">💣 SERIA</button>
+                </div>
+                <div class="note-area">
+                    <input type="text" id="left-note-input" placeholder="Notatka...">
+                    <button onclick="saveCustomNote('left')">OK</button>
+                </div>
+            </div>
+
+            <!-- MOJA ZAWODNICZKA -->
+            <div class="sector-column me">
+                <div class="column-header">ZAWODNICZKA</div>
+                <div class="counter-section">
+                    <div class="fish-display" id="me-fish-count">0</div>
+                    <div class="live-position-badge" id="me-position-badge">-</div>
+                    <button class="counter-btn" onclick="addFish('me')">+ RYBA</button>
+                    <button class="counter-btn minus-btn" onclick="removeFish('me')">Cofnij (-1)</button>
+                </div>
+
+                <div class="live-stats">
+                    <div>Tempo: <span id="me-stat-tempo">0s</span></div>
+                    <div>🎯 Naj: <span id="me-stat-method">Brak</span></div>
+                    <div>🔮 Prognoza: <span id="me-stat-prog">0 szt.</span></div>
+                    <div>⚖️ Waga (p): <span id="me-stat-weight">0.00 kg</span></div>
+                </div>
+
+                <div class="section-title">Metoda</div>
+                <div class="quick-buttons">
+                    <button class="method-btn me-method" id="me-m-tyczka" onclick="setMethod('me', 'Tyczka')">Tyczka</button>
+                    <button class="method-btn me-method" id="me-m-bat" onclick="setMethod('me', 'Bat')">Bat</button>
+                    <button class="method-btn me-method" id="me-m-odleglosc" onclick="setMethod('me', 'Odległość')">Odległość</button>
+                    <button class="method-btn me-method" id="me-m-ukleja" onclick="setMethod('me', 'Uklejówka')">Ukleja</button>
+                </div>
+                <div class="section-title">Nęcenie</div>
+                <div class="quick-buttons">
+                    <button class="bait-btn" onclick="logBait('me', 'Kubek')">🥣 Kubek</button>
+                    <button class="bait-btn" onclick="logBait('me', 'Z ręki')">✋ Z ręki</button>
+                    <button class="bait-btn" onclick="logBait('me', 'Proca')">🏹 Proca</button>
+                    <button class="bait-btn" onclick="logBait('me', 'Robak luźny')">🐛 Robak</button>
+                    <button class="bait-btn" onclick="logBait('me', 'Seria')">💣 SERIA</button>
+                </div>
+                <div class="note-area">
+                    <input type="text" id="me-note-input" placeholder="Notatka...">
+                    <button onclick="saveCustomNote('me')">OK</button>
+                </div>
+            </div>
+
+            <!-- PRAWY SĄSIAD -->
+            <div class="sector-column right">
+                <div class="column-header">Sąsiad PRAWY</div>
+                <div class="counter-section">
+                    <div class="fish-display" id="right-fish-count">0</div>
+                    <div class="live-position-badge" id="right-position-badge">-</div>
+                    <button class="counter-btn" onclick="addFish('right')">+ RYBA</button>
+                    <button class="counter-btn minus-btn" onclick="removeFish('right')">Cofnij (-1)</button>
+                </div>
+
+                <div class="live-stats">
+                    <div>Tempo: <span id="right-stat-tempo">0s</span></div>
+                    <div>🎯 Naj: <span id="right-stat-method">Brak</span></div>
+                    <div>🔮 Prognoza: <span id="right-stat-prog">0 szt.</span></div>
+                    <div>⚖️ Waga (p): <span id="right-stat-weight">0.00 kg</span></div>
+                </div>
+
+                <div class="section-title">Metoda</div>
+                <div class="quick-buttons">
+                    <button class="method-btn right-method" id="right-m-tyczka" onclick="setMethod('right', 'Tyczka')">Tyczka</button>
+                    <button class="method-btn right-method" id="right-m-bat" onclick="setMethod('right', 'Bat')">Bat</button>
+                    <button class="method-btn right-method" id="right-m-odleglosc" onclick="setMethod('right', 'Odległość')">Odległość</button>
+                    <button class="method-btn right-method" id="right-m-ukleja" onclick="setMethod('right', 'Uklejówka')">Ukleja</button>
+                </div>
+                <div class="section-title">Nęcenie</div>
+                <div class="quick-buttons">
+                    <button class="bait-btn" onclick="logBait('right', 'Kubek')">🥣 Kubek</button>
+                    <button class="bait-btn" onclick="logBait('right', 'Z ręki')">✋ Z ręki</button>
+                    <button class="bait-btn" onclick="logBait('right', 'Proca')">🏹 Proca</button>
+                    <button class="bait-btn" onclick="logBait('right', 'Robak luźny')">🐛 Robak</button>
+                    <button class="bait-btn" onclick="logBait('right', 'Seria')">💣 SERIA</button>
+                </div>
+                <div class="note-area">
+                    <input type="text" id="right-note-input" placeholder="Notatka...">
+                    <button onclick="saveCustomNote('right')">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-section" id="chart-card-wrapper">
+            <div class="section-title" style="color: var(--accent-color); font-size: 11px;">📊 Przebieg tury w czasie (Skumulowany)</div>
+            <div class="chart-container"><canvas id="fishChart"></canvas></div>
+        </div>
+    </div>
+
+    <div class="action-container">
+        <button class="action-btn messenger-btn" onclick="generateMessengerRaport()">💬 POBIERZ RAPORT NA MESSENGERA</button>
+        <button class="action-btn gemini-btn" onclick="exportToGemini()">🤖 EKSPORT LOGÓW DO GEMINI</button>
+        <button class="action-btn pdf-btn" onclick="generatePDF()">📄 POBIERZ RAPORT KOŃCOWY PDF</button>
+        <button class="action-btn clear-btn" onclick="resetData()">🗑️ CZYSZCZENIE I RESET TURY</button>
+    </div>
+
+    <div class="dashboard-section">
+        <div class="section-title" style="color: var(--accent-color); font-size: 11px;">📋 Logi zdarzeń tury</div>
+        <div class="log-box" id="log-box-container">
+            <div class="log-entry">System gotowy. Wersja 4.0 Sztab Aktywna.</div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="copyModal">
+        <div class="modal-box">
+            <div class="section-title" id="modalTitle" style="color:var(--accent-color)">Kopiowanie</div>
+            <textarea class="modal-textarea" id="modalTextarea" readonly></textarea>
+            <button class="modal-close-btn" onclick="closeModal()">ZAMKNIJ</button>
+        </div>
+    </div>
+
+    <script>
+        let dataStore = {
+            left: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] },
+            me: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] },
+            right: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] }
+        };
+
+        let chartInstance = null;
+        let raceTimer = null;
+        let raceSeconds = 4 * 60 * 60; 
+        let totalDuration = 4 * 60 * 60;
+        let isRaceActive = false;
+        let wakeLock = null;
+
+        window.onload = function() {
+            if(localStorage.getItem('mp_u20_v4_store')) {
+                dataStore = JSON.parse(localStorage.getItem('mp_u20_v4_store'));
+                if(localStorage.getItem('mp_u20_v4_seconds')) {
+                    raceSeconds = parseInt(localStorage.getItem('mp_u20_v4_seconds'));
+                    isRaceActive = true;
+                    toggleRaceTimers(); // Wznów stoper automatycznie
+                }
+                updateUI();
+                recalculateAllStats();
+            }
+            initChart();
+        };
+
+        function getTimestamp() { return new Date().toTimeString().split(' ')[0]; }
+        
+        function saveData() { 
+            localStorage.setItem('mp_u20_v4_store', JSON.stringify(dataStore)); 
+            if(isRaceActive) {
+                localStorage.setItem('mp_u20_v4_seconds', raceSeconds);
+            }
+            updateChart(); 
+        }
+
+        function addLog(text) {
+            const container = document.getElementById('log-box-container');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerText = '[' + getTimestamp() + '] ' + text;
+            container.insertBefore(entry, container.firstChild);
+        }
+
+        /* Wakelock API - Blokowanie wygaszania ekranu */
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log('WakeLock error: ' + err.message);
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock !== null) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
+        /* Obsługa Timera Zawodów */
+        function toggleRaceTimers() {
+            if (raceTimer) {
+                clearInterval(raceTimer);
+                raceTimer = null;
+                document.getElementById('timer-trigger-btn').innerText = '▶️ WZNAWIAJ TURĘ';
+                addLog('Czas wstrzymany.');
+                releaseWakeLock();
+            } else {
+                if(!isRaceActive) {
+                    isRaceActive = true;
+                    raceSeconds = 4 * 60 * 60; 
+                    addLog('⚠️ SYGNAŁ START: Tura rozpoczęta (4 godziny łowienia)!');
+                }
+                document.getElementById('timer-trigger-btn').innerText = '⏸️ PAUZUJ TURĘ';
+                requestWakeLock();
+                
+                raceTimer = setInterval(() => {
+                    raceSeconds--;
+                    localStorage.setItem('mp_u20_v4_seconds', raceSeconds);
+                    
+                    if(raceSeconds <= 0) {
+                        clearInterval(raceTimer);
+                        raceTimer = null;
+                        isRaceActive = false;
+                        localStorage.removeItem('mp_u20_v4_seconds');
+                        document.getElementById('race-timer-text').innerText = '00:00:00';
+                        document.getElementById('timer-progress-fill').style.width = '0%';
+                        addLog('🏁 KONIEC TURY ZAWODÓW!');
+                        alert('KONIEC TURY!');
+                        releaseWakeLock();
+                        return;
+                    }
+
+                    if(raceSeconds === 5 * 60) {
+                        addLog('⚠️ SYGNAŁ: Ostatnie 5 minut tury!');
+                        alert('Zostało 5 minut do końca!');
+                    }
+
+                    let h = Math.floor(raceSeconds / 3600).toString().padStart(2, '0');
+                    let m = Math.floor((raceSeconds % 3600) / 60).toString().padStart(2, '0');
+                    let s = (raceSeconds % 60).toString().padStart(2, '0');
+                    document.getElementById('race-timer-text').innerText = h + ':' + m + ':' + s;
+                    
+                    let pct = (raceSeconds / totalDuration) * 100;
+                    document.getElementById('timer-progress-fill').style.width = pct + '%';
+                    
+                    // Odświeżaj prognozy w locie co minutę
+                    if(raceSeconds % 60 === 0) { recalculateAllStats(); }
+                }, 1000);
+            }
+        }
+
+        function addFish(comp) {
+            dataStore[comp].fishCount++;
+            dataStore[comp].events.push({ 
+                time: getTimestamp(), 
+                type: 'RYBA', 
+                count: dataStore[comp].fishCount, 
+                method: dataStore[comp].currentMethod, 
+                rawTime: Date.now(),
+                elapsedSec: totalDuration - raceSeconds
+            });
+            let name = comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy');
+            addLog(name + ': +1 ryba (Łącznie: ' + dataStore[comp].fishCount + ')');
+            updateUI(); recalculateAllStats(); saveData();
+        }
+
+        function removeFish(comp) {
+            if(dataStore[comp].fishCount > 0) {
+                dataStore[comp].fishCount--;
+                dataStore[comp].events.push({ 
+                    time: getTimestamp(), 
+                    type: 'KOREKTA_-1', 
+                    count: dataStore[comp].fishCount, 
+                    method: dataStore[comp].currentMethod, 
+                    rawTime: Date.now(),
+                    elapsedSec: totalDuration - raceSeconds
+                });
+                let name = comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy');
+                addLog(name + ': Korekta (-1 ryba)');
+                updateUI(); recalculateAllStats(); saveData();
+            }
+        }
+
+        function setMethod(comp, methodName) {
+            dataStore[comp].currentMethod = methodName;
+            dataStore[comp].events.push({ time: getTimestamp(), type: 'METODA', value: methodName, count: dataStore[comp].fishCount, rawTime: Date.now() });
+            let name = comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy');
+            addLog(name + ': Zmiana techniki na -> ' + methodName);
+            updateUI(); saveData();
+        }
+
+        function logBait(comp, baitType) {
+            dataStore[comp].lastBait = baitType;
+            dataStore[comp].events.push({ time: getTimestamp(), type: 'NĘCENIE', value: baitType, count: dataStore[comp].fishCount, rawTime: Date.now() });
+            let name = comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy');
+            addLog(name + ': Podanie towaru -> ' + baitType);
+            saveData();
+        }
+
+        function saveCustomNote(comp) {
+            const input = document.getElementById(comp + '-note-input');
+            if(!input.value.trim()) return;
+            dataStore[comp].events.push({ time: getTimestamp(), type: 'NOTATKA', value: input.value, count: dataStore[comp].fishCount, rawTime: Date.now() });
+            let name = comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy');
+            addLog(name + ': [Notatka] ' + input.value);
+            input.value = '';
+            saveData();
+        }
+
+        /* ZAAWANSOWANA MATEMATYKA SPORTOWA SEKTORA (LIVE STATS) */
+        function recalculateAllStats() {
+            let avgWeightG = parseFloat(document.getElementById('avg-weight-input').value) || 200;
+            
+            // 1. Wylicz pozycje i różnice (Live Leaderboard)
+            let counts = [
+                { id: 'left', count: dataStore.left.fishCount, label: 'Lewy' },
+                { id: 'me', count: dataStore.me.fishCount, label: 'ZAWODNICZKA' },
+                { id: 'right', count: dataStore.right.fishCount, label: 'Prawy' }
+            ];
+            
+            counts.sort((a, b) => b.count - a.count);
+            
+            counts.forEach((item, idx) => {
+                let badge = document.getElementById(item.id + '-position-badge');
+                let pos = idx + 1;
+                let text = '';
+                
+                if (pos === 1) {
+                    let nextItem = counts[1];
+                    let diff = item.count - nextItem.count;
+                    text = '🥇 Lider (+' + diff + ')';
+                } else if (pos === 2) {
+                    let leaderItem = counts[0];
+                    let nextItem = counts[2];
+                    let diffLeader = leaderItem.count - item.count;
+                    let diffNext = item.count - nextItem.count;
+                    text = '🥈 2. miejsce (-' + diffLeader + ' do 🥇 / +' + diffNext + ')';
+                } else {
+                    let leaderItem = counts[0];
+                    let diffLeader = leaderItem.count - item.count;
+                    text = '🥉 3. miejsce (-' + diffLeader + ' do 🥇)';
+                }
+                badge.innerText = text;
+            });
+
+            // 2. Wylicz tempo, prognozy sztuk i wagi dla każdego z trzech stanowisk
+            ['left', 'me', 'right'].forEach(comp => {
+                let events = dataStore[comp].events;
+                let fishEvents = events.filter(e => e.type === 'RYBA');
+                
+                // Średnie tempo z ostatnich 3 ryb
+                let tempoText = '0s';
+                if(fishEvents.length >= 2) {
+                    let limit = Math.min(fishEvents.length, 3);
+                    let recent = fishEvents.slice(-limit);
+                    let totalDiff = 0;
+                    for(let i = 1; i < recent.length; i++) {
+                        totalDiff += (recent[i].rawTime - recent[i-1].rawTime);
+                    }
+                    let avgSec = Math.round((totalDiff / (recent.length - 1)) / 1000);
+                    tempoText = avgSec > 60 ? Math.floor(avgSec/60) + 'm ' + (avgSec%60) + 's' : avgSec + 's';
+                }
+                document.getElementById(comp + '-stat-tempo').innerText = tempoText;
+
+                // Najskuteczniejsza metoda
+                let methodsMap = {};
+                fishEvents.forEach(e => { let m = e.method || 'Nieznana'; methodsMap[m] = (methodsMap[m] || 0) + 1; });
+                let bestMethod = 'Brak'; let maxFish = 0;
+                for (let m in methodsMap) { if(methodsMap[m] > maxFish) { maxFish = methodsMap[m]; bestMethod = m; } }
+                document.getElementById(comp + '-stat-method').innerText = bestMethod !== 'Brak' ? bestMethod + ' (' + maxFish + ')' : 'Brak';
+
+                // PROGNOZA KOŃCOWA (Algorytm ekstrapolacji czasu tury)
+                let elapsedSec = totalDuration - raceSeconds;
+                let progCount = dataStore[comp].fishCount;
+                
+                if (elapsedSec > 120 && dataStore[comp].fishCount > 0) { // Licz dopiero po 2 minutach zawodów
+                    let fishPerSecond = dataStore[comp].fishCount / elapsedSec;
+                    progCount = Math.round(fishPerSecond * totalDuration);
+                }
+                document.getElementById(comp + '-stat-prog').innerText = progCount + ' szt.';
+
+                // SZACWANA WAGA KOŃCOWA
+                let estWeightKg = (progCount * avgWeightG) / 1000;
+                document.getElementById(comp + '-stat-weight').innerText = estWeightKg.toFixed(2) + ' kg';
+            });
+        }
+
+        function updateUI() {
+            document.getElementById('left-fish-count').innerText = dataStore.left.fishCount;
+            document.getElementById('me-fish-count').innerText = dataStore.me.fishCount;
+            document.getElementById('right-fish-count').innerText = dataStore.right.fishCount;
+
+            ['left', 'me', 'right'].forEach(comp => {
+                document.querySelectorAll('.' + comp + '-method').forEach(btn => btn.classList.remove('active'));
+                let m = dataStore[comp].currentMethod;
+                let id = '';
+                if(m === 'Tyczka') id = comp + '-m-tyczka';
+                if(m === 'Bat') id = comp + '-m-bat';
+                if(m === 'Odległość') id = comp + '-m-odleglosc';
+                if(m === 'Uklejówka') id = comp + '-m-ukleja';
+                if(id && document.getElementById(id)) document.getElementById(id).classList.add('active');
+            });
+        }
+
+        function showCopyModal(title, text) {
+            document.getElementById('modalTitle').innerText = title;
+            const textarea = document.getElementById('modalTextarea');
+            textarea.value = text;
+            document.getElementById('copyModal').style.display = 'flex';
+            setTimeout(() => { textarea.focus(); textarea.select(); }, 150);
+        }
+        function closeModal() { document.getElementById('copyModal').style.display = 'none'; }
+
+        function generateMessengerRaport() {
+            let txt = '📊 ANALIZA MP U20 | ' + document.getElementById('meta-sector').value + ' | Stan. ' + document.getElementById('meta-stan').value + '\n';
+            txt += '-------------------------\n';
+            txt += '⬅️ LEWY: ' + dataStore.left.fishCount + ' szt. | ' + document.getElementById('left-position-badge').innerText + ' | Prog: ' + document.getElementById('left-stat-prog').innerText + '\n';
+            txt += '👧 JA: ' + dataStore.me.fishCount + ' szt. | ' + document.getElementById('me-position-badge').innerText + ' | Prog: ' + document.getElementById('me-stat-prog').innerText + '\n';
+            txt += '➡️ PRAWY: ' + dataStore.right.fishCount + ' szt. | ' + document.getElementById('right-position-badge').innerText + ' | Prog: ' + document.getElementById('right-stat-prog').innerText + '\n';
+            txt += '-------------------------';
+            showCopyModal('💬 Szybki raport na Messengera', txt);
+        }
+
+        function exportToGemini() {
+            let output = 'Cześć Gemini, przeanalizuj przebieg tury Mistrzostw Polski U20. ';
+            output += 'Sektor: ' + document.getElementById('meta-sector').value + ', Stanowisko: ' + document.getElementById('meta-stan').value + '. ';
+            output += 'Szacowana średnia waga ryby w sektorze: ' + document.getElementById('avg-weight-input').value + 'g.\n\n';
+            ['left', 'me', 'right'].forEach(comp => {
+                let role = comp === 'left' ? 'SĄSIAD_LEWY' : (comp === 'me' ? 'MOJA_ZAWODNICZKA' : 'SĄSIAD_PRAWY');
+                output += '\n[LOGI DLA: ' + role + ']\n';
+                if(dataStore[comp].events.length === 0) output += 'Brak logów.\n';
+                dataStore[comp].events.forEach(ev => {
+                    output += ev.time + ' - ' + ev.type + ' | Stan: ' + (ev.value || ev.method || '') + ' | Licznik: ' + ev.count + '\n';
+                });
+            });
+            showCopyModal('🤖 Pełny zrzut logów analitycznych dla Gemini', output);
+        }
+
+        function generatePDF() {
+            addLog('Budowanie raportu PDF...');
+            const element = document.getElementById('pdf-container');
+            const opt = {
+                margin: 8,
+                filename: 'Raport_Trenera_' + document.getElementById('meta-sector').value + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, backgroundColor: '#0b0f19', useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save().then(() => { addLog('Plik PDF pobrany pomyślnie.'); });
+        }
+
+        function resetData() {
+            if(confirm('Wyczyścić CAŁĄ aktualną turę? Stracisz bezpowrotnie wykres i statystyki.')) {
+                dataStore = {
+                    left: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] },
+                    me: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] },
+                    right: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] }
+                };
+                localStorage.removeItem('mp_u20_v4_store');
+                localStorage.removeItem('mp_u20_v4_seconds');
+                if(raceTimer) { clearInterval(raceTimer); raceTimer = null; }
+                isRaceActive = false;
+                raceSeconds = 4 * 60 * 60;
+                document.getElementById('race-timer-text').innerText = '04:00:00';
+                document.getElementById('timer-progress-fill').style.width = '100%';
+                document.getElementById('timer-trigger-btn').innerText = '▶️ START TURY (4H)';
+                document.getElementById('log-box-container').innerHTML = '<div class="log-entry">Wyczyszczono dane stanowisk. Nowa tura.</div>';
+                updateUI(); recalculateAllStats(); updateChart();
+                releaseWakeLock();
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('fishChart').getContext('2d');
+            
+            // Konfiguracja sportowych linii z gradientem pod spodem
+            let gradLeft = ctx.createLinearGradient(0, 0, 0, 200); gradLeft.addColorStop(0, 'rgba(239,68,68,0.2)'); gradLeft.addColorStop(1, 'transparent');
+            let gradMe = ctx.createLinearGradient(0, 0, 0, 200); gradMe.addColorStop(0, 'rgba(16,185,129,0.25)'); gradMe.addColorStop(1, 'transparent');
+            let gradRight = ctx.createLinearGradient(0, 0, 0, 200); gradRight.addColorStop(0, 'rgba(59,130,246,0.2)'); gradRight.addColorStop(1, 'transparent');
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'Lewy', data: [], borderColor: '#ef4444', backgroundColor: gradLeft, fill: true, tension: 0.15, borderWidth: 2, pointRadius: 1 },
+                        { label: 'ZAWODNICZKA', data: [], borderColor: '#10b981', backgroundColor: gradMe, fill: true, tension: 0.15, borderWidth: 3, pointRadius: 2 },
+                        { label: 'Prawy', data: [], borderColor: '#3b82f6', backgroundColor: gradRight, fill: true, tension: 0.15, borderWidth: 2, pointRadius: 1 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 8 } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 9 }, stepSize: 1 }, min: 0 }
+                    },
+                    plugins: { legend: { labels: { color: '#f8fafc', font: { size: 9, weight: 'bold' } } } }
+                }
+            });
+            updateChart();
+        }
+
+        function updateChart() {
+            if(!chartInstance) return;
+            let allTimes = [];
+            ['left', 'me', 'right'].forEach(comp => {
+                dataStore[comp].events.forEach(e => {
+                    let shortTime = e.time.substring(0, 5);
+                    if(!allTimes.includes(shortTime)) allTimes.push(shortTime);
+                });
+            });
+            allTimes.sort();
+
+            let leftData = [], meData = [], rightData = [];
+            allTimes.forEach(t => {
+                leftData.push(getFishCountAtTime('left', t));
+                meData.push(getFishCountAtTime('me', t));
+                rightData.push(getFishCountAtTime('right', t));
+            });
+
+            chartInstance.data.labels = allTimes;
+            chartInstance.data.datasets[0].data = leftData;
+            chartInstance.data.datasets[1].data = meData;
+            chartInstance.data.datasets[2].data = rightData;
+            chartInstance.update();
+        }
+
+        function getFishCountAtTime(comp, timeStr) {
+            let lastCount = 0;
+            for(let i=0; i<dataStore[comp].events.length; i++) {
+                let ev = dataStore[comp].events[i];
+                if(ev.time.substring(0, 5) <= timeStr) {
+                    if(ev.type === 'RYBA' || ev.type === 'KOREKTA_-1') lastCount = ev.count;
+                } else { break; }
+            }
+            return lastCount;
+        }
+    </script>
+</body>
+</html>

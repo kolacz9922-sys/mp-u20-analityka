@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Feeder Trener PRO v4.5 - Sztab Szkoleniowy</title>
+    <title>Feeder Trener PRO v4.6 - Mistrzostwa Polski U20</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -74,6 +74,7 @@
         .chart-container { position: relative; width: 100%; height: 210px; margin-top: 6px; }
         .log-box { background-color: #020617; border-radius: 10px; padding: 8px; max-height: 120px; overflow-y: auto; font-family: monospace; font-size: 10px; color: #38bdf8; margin-top: 6px; }
         .log-entry { margin-bottom: 3px; border-bottom: 1px dashed #1e293b; padding-bottom: 3px; }
+        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; padding: 15px; }
         .modal-box { background-color: #1e293b; border-radius: var(--border-radius); width: 100%; max-width: 450px; padding: 16px; border: 2px solid var(--accent-color); display: flex; flex-direction: column; }
         .modal-textarea { width: 100%; height: 180px; background-color: #020617; color: #fff; border: 1px solid #475569; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 11px; resize: none; user-select: text!important; -webkit-user-select: text!important; }
@@ -82,7 +83,7 @@
 </head>
 <body>
     <div id="pdf-container">
-        <header><h1>🏆 Feeder Trener PRO v4.5 – PANEL SEKTOROWY</h1></header>
+        <header><h1>🏆 Feeder Trener PRO v4.6 – PANEL SEKTOROWY</h1></header>
         <div class="meta-panel">
             <input type="text" id="meta-sector" value="Sektor A">
             <input type="text" id="meta-stan" value="Stanowisko 15">
@@ -110,8 +111,8 @@
                 <div class="live-stats">
                     <div>Tempo: <span id="left-stat-tempo">0s</span></div>
                     <div>🎯 Naj: <span id="left-stat-method">Brak</span></div>
-                    <div>🔮 Prognoza: <span id="left-stat-prog">0 szt.</span></div>
-                    <div>⚖️ Waga (p): <span id="left-stat-weight">0.00 kg</span></div>
+                    <div>🔮 Prog: <span id="left-stat-prog">0 szt.</span></div>
+                    <div>⚖️ Waga: <span id="left-stat-weight">0.00 kg</span></div>
                 </div>
                 <div class="section-title">Metoda</div>
                 <div class="quick-buttons">
@@ -141,8 +142,8 @@
                 <div class="live-stats">
                     <div>Tempo: <span id="me-stat-tempo">0s</span></div>
                     <div>🎯 Naj: <span id="me-stat-method">Brak</span></div>
-                    <div>🔮 Prognoza: <span id="me-stat-prog">0 szt.</span></div>
-                    <div>⚖️ Waga (p): <span id="me-stat-weight">0.00 kg</span></div>
+                    <div>🔮 Prog: <span id="me-stat-prog">0 szt.</span></div>
+                    <div>⚖️ Waga: <span id="me-stat-weight">0.00 kg</span></div>
                 </div>
                 <div class="section-title">Metoda</div>
                 <div class="quick-buttons">
@@ -172,8 +173,8 @@
                 <div class="live-stats">
                     <div>Tempo: <span id="right-stat-tempo">0s</span></div>
                     <div>🎯 Naj: <span id="right-stat-method">Brak</span></div>
-                    <div>🔮 Prognoza: <span id="right-stat-prog">0 szt.</span></div>
-                    <div>⚖️ Waga (p): <span id="right-stat-weight">0.00 kg</span></div>
+                    <div>🔮 Prog: <span id="right-stat-prog">0 szt.</span></div>
+                    <div>⚖️ Waga: <span id="right-stat-weight">0.00 kg</span></div>
                 </div>
                 <div class="section-title">Metoda</div>
                 <div class="quick-buttons">
@@ -206,13 +207,13 @@
     </div>
     <div class="dashboard-section">
         <div class="section-title" style="color: var(--accent-color); font-size: 11px;">📋 Ostatnie logi zdarzeń</div>
-        <div class="log-box" id="log-box-container"><div class="log-entry">System gotowy. Wersja 4.5 Sztab Aktywna.</div></div>
+        <div class="log-box" id="log-box-container"><div class="log-entry">System gotowy. Wersja 4.6 Aktywna (Safe Mode).</div></div>
     </div>
     <div class="modal-overlay" id="copyModal">
         <div class="modal-box">
             <div class="section-title" id="modalTitle" style="color:var(--accent-color)">Kopiowanie</div>
             <textarea class="modal-textarea" id="modalTextarea" readonly></textarea>
-            <button class="modal-close-btn" onclick="closeModal()">ZAMKNIJ</button>
+            <button class="modal-close-btn" onclick="closeModal()">ZAMKNIJ OKNO</button>
         </div>
     </div>
     <script>
@@ -222,21 +223,25 @@
             right: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] }
         };
         let chartInstance = null; let raceTimer = null; let raceSeconds = 4 * 60 * 60; let totalDuration = 4 * 60 * 60; let isRaceActive = false; let wakeLock = null;
+        
         window.onload = function() {
-            if(localStorage.getItem('mp_u20_v4_store')) {
-                dataStore = JSON.parse(localStorage.getItem('mp_u20_v4_store'));
-                updateUI(); recalculateAllStats();
-            }
-            initChart();
+            try {
+                if(localStorage.getItem('mp_u20_v4_store')) {
+                    dataStore = JSON.parse(localStorage.getItem('mp_u20_v4_store'));
+                    updateUI(); recalculateAllStats();
+                }
+                initChart();
+            } catch(e) { console.error('Błąd inicjalizacji: ', e); }
         };
         function getTimestamp() { return new Date().toTimeString().split(' ')[0]; }
         function saveData() { localStorage.setItem('mp_u20_v4_store', JSON.stringify(dataStore)); updateChart(); }
         function addLog(text) {
             const container = document.getElementById('log-box-container'); const entry = document.createElement('div'); entry.className = 'log-entry';
-            entry.innerText = '[' + getTimestamp() + '] ' + text; container.insertBefore(entry, container.firstChild);
+            entry.innerText = `[${getTimestamp()}] ${text}`; container.insertBefore(entry, container.firstChild);
         }
         async function requestWakeLock() { try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); } } catch (err) {} }
         function releaseWakeLock() { if (wakeLock !== null) { wakeLock.release(); wakeLock = null; } }
+        
         function toggleRaceTimers() {
             if (raceTimer) {
                 clearInterval(raceTimer); raceTimer = null; document.getElementById('timer-trigger-btn').innerText = '▶️ WZNAWIAJ TURĘ'; addLog('Czas wstrzymany.'); releaseWakeLock();
@@ -250,46 +255,46 @@
                     }
                     if(raceSeconds === 5 * 60) { addLog('⚠️ SYGNAŁ: Ostatnie 5 minut!'); alert('Zostało 5 minut do końca!'); }
                     let h = Math.floor(raceSeconds / 3600).toString().padStart(2, '0'); let m = Math.floor((raceSeconds % 3600) / 60).toString().padStart(2, '0'); let s = (raceSeconds % 60).toString().padStart(2, '0');
-                    document.getElementById('race-timer-text').innerText = h + ':' + m + ':' + s;
+                    document.getElementById('race-timer-text').innerText = `${h}:${m}:${s}`;
                     document.getElementById('timer-progress-fill').style.width = ((raceSeconds / totalDuration) * 100) + '%';
                 }, 1000);
             }
         }
         function addFish(comp) {
             dataStore[comp].fishCount++; dataStore[comp].events.push({ time: getTimestamp(), type: 'RYBA', count: dataStore[comp].fishCount, method: dataStore[comp].currentMethod, rawTime: Date.now() });
-            addLog((comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy')) + ': +1 ryba (Razem: ' + dataStore[comp].fishCount + ')');
+            addLog(`${comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy')}: +1 ryba (Razem: ${dataStore[comp].fishCount})`);
             updateUI(); recalculateAllStats(); saveData();
         }
         function removeFish(comp) {
             if(dataStore[comp].fishCount > 0) {
                 dataStore[comp].fishCount--; dataStore[comp].events.push({ time: getTimestamp(), type: 'KOREKTA_-1', count: dataStore[comp].fishCount, method: dataStore[comp].currentMethod, rawTime: Date.now() });
-                addLog((comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy')) + ': Odjęto rybę');
+                addLog(`${comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy')}: Odjęto rybę`);
                 updateUI(); recalculateAllStats(); saveData();
             }
         }
         function setMethod(comp, methodName) {
             dataStore[comp].currentMethod = methodName; dataStore[comp].events.push({ time: getTimestamp(), type: 'METODA', value: methodName, count: dataStore[comp].fishCount, rawTime: Date.now() });
-            addLog((comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy')) + ': Zmiana metody -> ' + methodName);
+            addLog(`${comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy')}: Zmiana metody -> ${methodName}`);
             updateUI(); saveData();
         }
         function logBait(comp, baitType) {
             dataStore[comp].lastBait = baitType; dataStore[comp].events.push({ time: getTimestamp(), type: 'NĘCENIE', value: baitType, count: dataStore[comp].fishCount, rawTime: Date.now() });
-            addLog((comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy')) + ': Nęcenie -> ' + baitType); saveData();
+            addLog(`${comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy')}: Nęcenie -> ${baitType}`); saveData();
         }
         function saveCustomNote(comp) {
-            const input = document.getElementById(comp + '-note-input'); if(!input.value.trim()) return;
+            const input = document.getElementById(`${comp}-note-input`); if(!input.value.trim()) return;
             dataStore[comp].events.push({ time: getTimestamp(), type: 'NOTATKA', value: input.value, count: dataStore[comp].fishCount, rawTime: Date.now() });
-            addLog((comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy')) + ': [Notatka] ' + input.value); input.value = ''; saveData();
+            addLog(`${comp === 'left' ? 'Lewy' : (comp === 'me' ? 'JA' : 'Prawy')}: [Notatka] ${input.value}`); input.value = ''; saveData();
         }
         function recalculateAllStats() {
             let avgWeightG = parseFloat(document.getElementById('avg-weight-input').value) || 200;
             let counts = [{ id: 'left', count: dataStore.left.fishCount }, { id: 'me', count: dataStore.me.fishCount }, { id: 'right', count: dataStore.right.fishCount }];
             counts.sort((a, b) => b.count - a.count);
             counts.forEach((item, idx) => {
-                let badge = document.getElementById(item.id + '-position-badge'); let pos = idx + 1;
-                if (pos === 1) { badge.innerText = '🥇 Lider (+' + (item.count - counts[1].count) + ')'; }
-                else if (pos === 2) { badge.innerText = '🥈 2. miejsce (-' + (counts[0].count - item.count) + ')'; }
-                else { badge.innerText = '🥉 3. miejsce (-' + (counts[0].count - item.count) + ')'; }
+                let badge = document.getElementById(`${item.id}-position-badge`); let pos = idx + 1;
+                if (pos === 1) { badge.innerText = `🥇 Lider (+${item.count - counts[1].count})`; }
+                else if (pos === 2) { badge.innerText = `🥈 2. miejsce (-${counts[0].count - item.count})`; }
+                else { badge.innerText = `🥉 3. miejsce (-${counts[0].count - item.count})`; }
             });
             ['left', 'me', 'right'].forEach(comp => {
                 let fishEvents = dataStore[comp].events.filter(e => e.type === 'RYBA');
@@ -298,85 +303,167 @@
                     let recent = fishEvents.slice(-3); let totalDiff = 0;
                     for(let i = 1; i < recent.length; i++) { totalDiff += (recent[i].rawTime - recent[i-1].rawTime); }
                     let avgSec = Math.round((totalDiff / (recent.length - 1)) / 1000);
-                    tempoText = avgSec > 60 ? Math.floor(avgSec/60) + 'm ' + (avgSec%60) + 's' : avgSec + 's';
+                    tempoText = avgSec > 60 ? `${Math.floor(avgSec/60)}m ${avgSec%60}s` : `${avgSec}s`;
                 }
-                document.getElementById(comp + '-stat-tempo').innerText = tempoText;
+                document.getElementById(`${comp}-stat-tempo`).innerText = tempoText;
                 let elapsedSec = totalDuration - raceSeconds; let progCount = dataStore[comp].fishCount;
                 if (elapsedSec > 30 && dataStore[comp].fishCount > 0) { progCount = Math.round((dataStore[comp].fishCount / elapsedSec) * totalDuration); }
-                document.getElementById(comp + '-stat-prog').innerText = progCount + ' szt.';
-                document.getElementById(comp + '-stat-weight').innerText = ((progCount * avgWeightG) / 1000).toFixed(2) + ' kg';
+                document.getElementById(`${comp}-stat-prog`).innerText = `${progCount} szt.`;
+                document.getElementById(`${comp}-stat-weight`).innerText = ((progCount * avgWeightG) / 1000).toFixed(2) + ' kg';
                 let methodsMap = {}; fishEvents.forEach(e => { let m = e.method || 'Nieznana'; methodsMap[m] = (methodsMap[m] || 0) + 1; });
                 let bestMethod = 'Brak'; let maxFish = 0; for (let m in methodsMap) { if(methodsMap[m] > maxFish) { maxFish = methodsMap[m]; bestMethod = m; } }
-                document.getElementById(comp + '-stat-method').innerText = bestMethod !== 'Brak' ? bestMethod + ' (' + maxFish + ')' : 'Brak';
+                document.getElementById(`${comp}-stat-method`).innerText = bestMethod !== 'Brak' ? `${bestMethod} (${maxFish})` : 'Brak';
             });
         }
         function updateUI() {
             document.getElementById('left-fish-count').innerText = dataStore.left.fishCount; document.getElementById('me-fish-count').innerText = dataStore.me.fishCount; document.getElementById('right-fish-count').innerText = dataStore.right.fishCount;
             ['left', 'me', 'right'].forEach(comp => {
-                document.querySelectorAll('.' + comp + '-method').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll(`.${comp}-method`).forEach(btn => btn.classList.remove('active'));
                 let m = dataStore[comp].currentMethod; let id = '';
-                if(m === 'Tyczka') id = comp + '-m-tyczka'; if(m === 'Bat') id = comp + '-m-bat';
-                if(m === 'Odległość') id = comp + '-m-odleglosc'; if(m === 'Uklejówka') id = comp + '-m-ukleja';
+                if(m === 'Tyczka') id = `${comp}-m-tyczka`; if(m === 'Bat') id = `${comp}-m-bat`;
+                if(m === 'Odległość') id = `${comp}-m-odleglosc`; if(m === 'Uklejówka') id = `${comp}-m-ukleja`;
                 if(id && document.getElementById(id)) document.getElementById(id).classList.add('active');
             });
         }
+        
+        /* ---------------- BEZPIECZNE OKNA KOPIOWANIA (W 100% ODPORNE NA BŁĘDY) ---------------- */
+        function showCopyModal(title, text) {
+            try {
+                document.getElementById('modalTitle').innerText = title;
+                const textarea = document.getElementById('modalTextarea');
+                textarea.value = text;
+                document.getElementById('copyModal').style.display = 'flex';
+                setTimeout(() => { textarea.focus(); textarea.select(); }, 150);
+            } catch(e) { alert('Błąd renderowania okna: ' + e.message); }
+        }
+        
+        function closeModal() { document.getElementById('copyModal').style.display = 'none'; }
+        
         function generateMessengerRaport() {
-            let txt = '📊 RAPORT SZYBKI | Sektor: ' + document.getElementById('meta-sector').value + ' | Stan. ' + document.getElementById('meta-stan').value + '\n';
-            txt += '-------------------------\n';
-            ['left', 'me', 'right'].forEach(c => {
-                let name = c === 'left' ? '⬅️ LEWY: ' : (c === 'me' ? '👧 JA: ' : '➡️ PRAWY: ');
-                txt += name + dataStore[c].fishCount + ' szt. | ' + document.getElementById(c + '-position-badge').innerText + ' | Prog: ' + document.getElementById(c + '-stat-prog').innerText + '\n';
-            });
-            txt += '-------------------------';
-            showCopyModal('💬 Kopiuj raport na Messengera', txt);
-        }
-        function exportToGemini() {
-            let output = 'Cześć Gemini, przeanalizuj przebieg tury zawodów spławikowych U20.\n';
-            output += 'Sektor: ' + document.getElementById('meta-sector').value + ', Stanowisko: ' + document.getElementById('meta-stan').value + '\n\n';
-            ['left', 'me', 'right'].forEach(comp => {
-                output += '\n[LOGI DLA: ' + comp.toUpperCase() + ']\n';
-                if(dataStore[comp].events.length === 0) output += 'Brak logów.\n';
-                dataStore[comp].events.forEach(ev => {
-                    output += ev.time + ' - Typ: ' + ev.type + ' | Metoda: ' + (ev.value || ev.method || '') + ' | Licznik ryb: ' + ev.count + '\n';
+            try {
+                const sektor = document.getElementById('meta-sector').value || 'Brak';
+                const stan = document.getElementById('meta-stan').value || 'Brak';
+                let txt = `📊 RAPORT SZYBKI | Sektor: ${sektor} | Stanowisko: ${stan}
+`;
+                txt += `-------------------------
+`;
+                ['left', 'me', 'right'].forEach(c => {
+                    let name = c === 'left' ? '⬅️ LEWY: ' : (c === 'me' ? '👧 JA: ' : '➡️ PRAWY: ');
+                    let badge = document.getElementById(`${c}-position-badge`) ? document.getElementById(`${c}-position-badge`).innerText : '';
+                    let prog = document.getElementById(`${c}-stat-prog`) ? document.getElementById(`${c}-stat-prog`).innerText : '0 szt.';
+                    txt += `${name} ${dataStore[c].fishCount} szt. | ${badge} | Prog: ${prog}
+`;
                 });
-            });
-            showCopyModal('🤖 Eksport danych do analizy AI', output);
+                txt += `-------------------------`;
+                showCopyModal('💬 Kopiuj raport na Messengera', txt);
+            } catch (error) { alert('Błąd w module Messengera: ' + error.message); }
         }
+        
+        function exportToGemini() {
+            try {
+                const sektor = document.getElementById('meta-sector').value || 'Brak';
+                const stan = document.getElementById('meta-stan').value || 'Brak';
+                let output = `Cześć Gemini, przeanalizuj przebieg tury zawodów spławikowych U20.
+`;
+                output += `Sektor: ${sektor}, Stanowisko: ${stan}
+
+`;
+                ['left', 'me', 'right'].forEach(comp => {
+                    output += `
+[LOGI DLA: ${comp.toUpperCase()}]
+`;
+                    if(!dataStore[comp].events || dataStore[comp].events.length === 0) {
+                        output += `Brak logów.
+`;
+                    } else {
+                        dataStore[comp].events.forEach(ev => {
+                            let val = ev.value || ev.method || '';
+                            output += `${ev.time} - Typ: ${ev.type} | Info: ${val} | Stan ryb: ${ev.count}
+`;
+                        });
+                    }
+                });
+                showCopyModal('🤖 Eksport danych do analizy AI', output);
+            } catch (error) { alert('Błąd w module Gemini AI: ' + error.message); }
+        }
+        
+        /* ---------------- NAPRAWIONE GENEROWANIE CZYSTEGO PDF DO DRUKU ---------------- */
         function generatePDF() {
-            const printElement = document.createElement('div');
-            printElement.style.padding = '20px'; printElement.style.color = '#000'; printElement.style.background = '#fff'; printElement.style.fontFamily = 'Arial, sans-serif';
-            let html = '<h1 style="text-align:center; margin-bottom:20px;">🏆 RAPORT TRENERA - MP U20</h1>';
-            html += '<p><strong>Sektor:</strong> ' + document.getElementById('meta-sector').value + ' | <strong>Stanowisko:</strong> ' + document.getElementById('meta-stan').value + '</p><br>';
-            html += '<table border="1" cellpadding="8" style="width:100%; border-collapse:collapse; text-align:center; margin-bottom:20px;">';
-            html += '<tr style="background:#f2f2f2;"><th>Zawodnik</th><th>Wynik (szt)</th><th>Najlepsza metoda</th><th>Średnie tempo</th><th>Prognoza wagi</th></tr>';
-            ['left', 'me', 'right'].forEach(c => {
-                let name = c==='left'?'Sąsiad Lewy':(c==='me'?'ZAWODNICZKA':'Sąsiad Prawy');
-                html += '<tr><td>' + name + '</td><td><strong>' + dataStore[c].fishCount + '</strong></td><td>' + document.getElementById(c+'-stat-method').innerText + '</td><td>' + document.getElementById(c+'-stat-tempo').innerText + '</td><td>' + document.getElementById(c+'-stat-weight').innerText + '</td></tr>';
-            });
-            html += '</table><br>';
-            html += '<h3>📋 Chronologiczny log zdarzeń:</h3><div style="font-family:monospace; font-size:11px;">';
-            let allLogs = [];
-            ['left', 'me', 'right'].forEach(c => { dataStore[c].events.forEach(e => { allLogs.push({ time: e.time, text: (c==='left'?'Lewy':(c==='me'?'JA':'Prawy')) + ': ' + e.type + ' ' + (e.value || e.method || '') + ' (Stan: ' + e.count + ')' }); }); });
-            allLogs.sort((a,b) => b.time.localeCompare(a.time));
-            allLogs.forEach(l => { html += '[' + l.time + '] ' + l.text + '<br>'; });
-            html += '</div>';
-            printElement.innerHTML = html;
-            const opt = { margin: 10, filename: 'Raport_Tura_' + document.getElementById('meta-sector').value + '.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, backgroundColor: '#ffffff' }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-            html2pdf().set(opt).from(printElement).save();
+            try {
+                addLog('Budowanie raportu PDF...');
+                
+                // Tworzymy niewidoczny fizycznie element DOM
+                const printElement = document.createElement('div');
+                printElement.style.position = 'absolute';
+                printElement.style.left = '-9999px';
+                printElement.style.top = '-9999px';
+                printElement.style.padding = '20px'; 
+                printElement.style.color = '#000'; 
+                printElement.style.background = '#fff'; 
+                printElement.style.fontFamily = 'Arial, sans-serif';
+                
+                let html = `<h1 style="text-align:center; margin-bottom:20px;">🏆 RAPORT TRENERA - MP U20</h1>`;
+                html += `<p><strong>Sektor:</strong> ${document.getElementById('meta-sector').value} | <strong>Stanowisko:</strong> ${document.getElementById('meta-stan').value}</p><br>`;
+                html += `<table border="1" cellpadding="8" style="width:100%; border-collapse:collapse; text-align:center; margin-bottom:20px;">`;
+                html += `<tr style="background:#f2f2f2;"><th>Zawodnik</th><th>Wynik (szt)</th><th>Najlepsza metoda</th><th>Średnie tempo</th><th>Prognoza wagi</th></tr>`;
+                
+                ['left', 'me', 'right'].forEach(c => {
+                    let name = c==='left'?'Sąsiad Lewy':(c==='me'?'ZAWODNICZKA':'Sąsiad Prawy');
+                    let method = document.getElementById(`${c}-stat-method`) ? document.getElementById(`${c}-stat-method`).innerText : '-';
+                    let tempo = document.getElementById(`${c}-stat-tempo`) ? document.getElementById(`${c}-stat-tempo`).innerText : '-';
+                    let weight = document.getElementById(`${c}-stat-weight`) ? document.getElementById(`${c}-stat-weight`).innerText : '-';
+                    html += `<tr><td>${name}</td><td><strong>${dataStore[c].fishCount}</strong></td><td>${method}</td><td>${tempo}</td><td>${weight}</td></tr>`;
+                });
+                
+                html += `</table><br><h3>📋 Chronologiczny log zdarzeń:</h3><div style="font-family:monospace; font-size:11px;">`;
+                let allLogs = [];
+                ['left', 'me', 'right'].forEach(c => { 
+                    if(dataStore[c].events) {
+                        dataStore[c].events.forEach(e => { 
+                            allLogs.push({ time: e.time, text: `${c==='left'?'Lewy':(c==='me'?'JA':'Prawy')}: ${e.type} ${e.value || e.method || ''} (Stan: ${e.count})` }); 
+                        }); 
+                    }
+                });
+                allLogs.sort((a,b) => a.time.localeCompare(b.time)); // Chronologicznie rosnąco
+                allLogs.forEach(l => { html += `[${l.time}] ${l.text}<br>`; });
+                html += `</div>`;
+                
+                printElement.innerHTML = html;
+                document.body.appendChild(printElement); // html2pdf musi mieć element w dokumencie
+                
+                const opt = { 
+                    margin: 10, 
+                    filename: `Raport_Tura_${document.getElementById('meta-sector').value}.pdf`, 
+                    image: { type: 'jpeg', quality: 0.98 }, 
+                    html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true }, 
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+                };
+                
+                html2pdf().set(opt).from(printElement).save().then(() => { 
+                    addLog('Plik PDF pobrany pomyślnie.'); 
+                    document.body.removeChild(printElement);
+                }).catch(err => {
+                    alert('Błąd tworzenia pliku PDF: ' + err.message);
+                    document.body.removeChild(printElement);
+                });
+            } catch(e) { alert('Ogólny błąd funkcji PDF: ' + e.message); }
         }
-        function closeModal() { document.getElementById('copyModal').style.none; document.getElementById('copyModal').style.display = 'none'; }
+        
         function resetData() {
             if(confirm('Wyczyścić całą turę? Stracisz zapisane logi i wykres.')) {
                 dataStore = { left: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] }, me: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] }, right: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] } };
                 localStorage.removeItem('mp_u20_v4_store'); if(raceTimer) { clearInterval(raceTimer); raceTimer = null; }
-                isRaceActive = false; document.getElementById('race-timer-text').innerText = '04:00:00'; document.getElementById('timer-progress-fill').style.width = '100%'; document.getElementById('log-box-container').innerHTML = '<div>Zresetowano.</div>';
+                isRaceActive = false; document.getElementById('race-timer-text').innerText = '04:00:00'; document.getElementById('timer-progress-fill').style.width = '100%'; document.getElementById('log-box-container').innerHTML = '<div class="log-entry">Zresetowano.</div>';
                 updateUI(); recalculateAllStats(); updateChart(); releaseWakeLock();
             }
         }
+        
         function initChart() {
-            const ctx = document.getElementById('fishChart').getContext('2d');
-            chartInstance = new Chart(ctx, { type: 'line', data: { labels: [], datasets: [ { label: 'Lewy', data: [], borderColor: '#ef4444', backgroundColor: 'transparent', tension: 0.15, borderWidth: 2 }, { label: 'ZAWODNICZKA', data: [], borderColor: '#10b981', backgroundColor: 'transparent', tension: 0.15, borderWidth: 3 }, { label: 'Prawy', data: [], borderColor: '#3b82f6', backgroundColor: 'transparent', tension: 0.15, borderWidth: 2 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 8 } } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 9 }, stepSize: 1 }, min: 0 } }, plugins: { legend: { labels: { color: '#f8fafc', font: { size: 9, weight: 'bold' } } } } } });
-            updateChart();
+            try {
+                const ctx = document.getElementById('fishChart').getContext('2d');
+                chartInstance = new Chart(ctx, { type: 'line', data: { labels: [], datasets: [ { label: 'Lewy', data: [], borderColor: '#ef4444', backgroundColor: 'transparent', tension: 0.15, borderWidth: 2 }, { label: 'ZAWODNICZKA', data: [], borderColor: '#10b981', backgroundColor: 'transparent', tension: 0.15, borderWidth: 3 }, { label: 'Prawy', data: [], borderColor: '#3b82f6', backgroundColor: 'transparent', tension: 0.15, borderWidth: 2 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 8 } } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 9 }, stepSize: 1 }, min: 0 } }, plugins: { legend: { labels: { color: '#f8fafc', font: { size: 9, weight: 'bold' } } } } } });
+                updateChart();
+            } catch(e) { console.error('Wykres błąd: ', e.message); }
         }
         function updateChart() {
             if(!chartInstance) return; let allTimes = [];

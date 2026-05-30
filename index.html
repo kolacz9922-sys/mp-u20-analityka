@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Feeder Trener PRO v4.5 - Mistrzostwa Polski U20</title>
+    <title>Feeder Trener PRO v4.5 - Sztab Szkoleniowy</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -18,124 +18,62 @@
             --accent-color: #f59e0b;
             --border-radius: 16px;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #0f172a, #020617);
-            color: var(--text-color);
-            padding: 10px;
-            padding-bottom: 40px;
-        }
-        
-        header {
-            text-align: center; margin-bottom: 10px;
-            background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.9));
-            padding: 10px; border-radius: var(--border-radius);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #0f172a, #020617); color: var(--text-color); padding: 10px; padding-bottom: 40px; }
+        header { text-align: center; margin-bottom: 10px; background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.9)); padding: 10px; border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.1); }
         header h1 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-color); font-weight: 800; }
-        
-        .meta-panel {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px;
-            background: var(--card-bg); padding: 8px; border-radius: var(--border-radius);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .meta-panel input {
-            background-color: #020617; border: 1px solid #334155; color: white; padding: 6px;
-            border-radius: 8px; font-size: 11px; text-align: center; user-select: text; -webkit-user-select: text;
-        }
-        
-        .timer-section {
-            grid-column: span 2; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(2,6,23,0.8); padding: 10px; border-radius: 10px; margin-top: 4px;
-            border: 1px solid rgba(245,158,11,0.2);
-        }
-        .timer-btn {
-            background: linear-gradient(135deg, #f59e0b, #d97706); color: #020617; border: none; 
-            padding: 8px 14px; font-weight: 800; font-size: 11px; border-radius: 6px; cursor: pointer;
-            text-transform: uppercase;
-        }
+        .meta-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; background: var(--card-bg); padding: 8px; border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.05); }
+        .meta-panel input { background-color: #020617; border: 1px solid #334155; color: white; padding: 6px; border-radius: 8px; font-size: 11px; text-align: center; user-select: text; -webkit-user-select: text; }
+        .timer-section { grid-column: span 2; display: flex; justify-content: space-between; align-items: center; background: rgba(2,6,23,0.8); padding: 10px; border-radius: 10px; margin-top: 4px; border: 1px solid rgba(245,158,11,0.2); }
+        .timer-btn { background: linear-gradient(135deg, #f59e0b, #d97706); color: #020617; border: none; padding: 8px 14px; font-weight: 800; font-size: 11px; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
         .timer-display-wrapper { display: flex; flex-direction: column; align-items: flex-end; }
         .timer-display { font-family: monospace; font-size: 18px; font-weight: 900; color: #fff; }
         .progress-bar-bg { width: 120px; height: 4px; background: #1e293b; border-radius: 2px; margin-top: 3px; overflow: hidden; }
         .progress-bar-fill { width: 100%; height: 100%; background: var(--accent-color); transition: width 1s linear; }
-
-        .weight-input-box {
-            grid-column: span 2; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(15,23,42,0.5); padding: 6px 10px; border-radius: 8px; margin-top: 2px; font-size: 11px;
-        }
-        .weight-input-box input { width: 70px; padding: 3px; font-size: 11px; background:#000; border:1px solid #334155; color:#fff; text-align:center;}
-
+        .weight-input-box { grid-column: span 2; display: flex; justify-content: space-between; align-items: center; background: rgba(15,23,42,0.5); padding: 6px 10px; border-radius: 8px; margin-top: 2px; font-size: 11px; }
+        .weight-input-box input { width: 70px; padding: 3px; font-size: 11px; background:#000; border:1px solid #334155; color:#fff; text-align:center; }
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
-        .sector-column {
-            background: var(--card-bg); border-radius: var(--border-radius); padding: 6px;
-            display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05);
-            position: relative; overflow: hidden;
-        }
-        
+        .sector-column { background: var(--card-bg); border-radius: var(--border-radius); padding: 6px; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
         .sector-column::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; }
         .sector-column.left::before { background: var(--left-color); }
         .sector-column.me::before { background: var(--me-color); }
         .sector-column.right::before { background: var(--right-color); }
-
         .column-header { text-align: center; font-weight: 800; font-size: 11px; margin-bottom: 6px; text-transform: uppercase; }
         .left .column-header { color: var(--left-color); }
         .me .column-header { color: var(--me-color); }
         .right .column-header { color: var(--right-color); }
-
         .counter-section { text-align: center; margin-bottom: 6px; background: rgba(0,0,0,0.4); padding: 6px 4px; border-radius: 10px; }
         .fish-display { font-size: 56px; font-weight: 900; font-family: monospace; color: #fff; line-height: 1; }
-        
         .live-position-badge { font-size: 9px; font-weight: 800; padding: 2px 4px; border-radius: 4px; display: inline-block; margin-top: 2px; text-transform: uppercase; }
         .me .live-position-badge { background: rgba(16,185,129,0.2); color: var(--me-color); border: 1px solid rgba(16,185,129,0.3); }
         .left .live-position-badge { background: rgba(239,68,68,0.15); color: #f87171; }
         .right .live-position-badge { background: rgba(59,130,246,0.15); color: #60a5fa; }
-
-        .counter-btn {
-            width: 100%; padding: 14px 0; font-size: 15px; font-weight: 900; border: none;
-            border-radius: 10px; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
+        .counter-btn { width: 100%; padding: 14px 0; font-size: 15px; font-weight: 900; border: none; border-radius: 10px; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
         .counter-btn:active { transform: scale(0.97); }
         .left .counter-btn { background: linear-gradient(135deg, #ef4444, #b91c1c); }
         .me .counter-btn { background: linear-gradient(135deg, #10b981, #047857); }
         .right .counter-btn { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
         .minus-btn { background: #334155 !important; font-size: 10px; padding: 5px 0; margin-top: 5px; box-shadow: none; opacity: 0.7; }
-
         .live-stats { background: rgba(2,6,23,0.5); padding: 5px; border-radius: 8px; margin-bottom: 6px; font-size: 9px; color: #e2e8f0; }
         .live-stats div { margin-bottom: 3px; display: flex; justify-content: space-between; }
         .live-stats span { font-family: monospace; font-weight: bold; color: #fff; }
-
         .section-title { font-size: 9px; color: var(--text-muted); text-transform: uppercase; margin: 5px 0 3px 0; font-weight: 800; }
         .quick-buttons { display: grid; grid-template-columns: 1fr; gap: 3px; }
-        
-        .method-btn, .bait-btn {
-            background-color: rgba(51,65,85,0.5); color: #cbd5e1; border: 1px solid rgba(71,85,105,0.5);
-            padding: 6px 2px; font-size: 10px; font-weight: 700; border-radius: 6px; cursor: pointer;
-        }
+        .method-btn, .bait-btn { background-color: rgba(51,65,85,0.5); color: #cbd5e1; border: 1px solid rgba(71,85,105,0.5); padding: 6px 2px; font-size: 10px; font-weight: 700; border-radius: 6px; cursor: pointer; }
         .method-btn.active { background: linear-gradient(135deg, #f59e0b, #d97706); color: #020617; border-color: #fbbf24; font-weight: 800; }
-
         .note-area { display: flex; margin-top: 6px; gap: 2px; }
         .note-area input { width: 100%; background: #020617; border: 1px solid #334155; color: #fff; padding: 5px; font-size: 10px; border-radius: 5px; user-select: text; -webkit-user-select: text; }
         .note-area button { background: #475569; color: white; border: none; padding: 0 6px; font-size: 10px; border-radius: 5px; }
-
         .action-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-        .action-btn {
-            padding: 14px; font-size: 12px; font-weight: 800; border: none; border-radius: var(--border-radius);
-            cursor: pointer; color: white; text-align: center; display: flex; align-items: center; justify-content: center;
-            text-transform: uppercase;
-        }
+        .action-btn { padding: 14px; font-size: 12px; font-weight: 800; border: none; border-radius: var(--border-radius); cursor: pointer; color: white; text-align: center; display: flex; align-items: center; justify-content: center; text-transform: uppercase; }
         .messenger-btn { background: linear-gradient(135deg, #006aff, #00b2fe); grid-column: span 2; font-size: 13px; }
         .gemini-btn { background: linear-gradient(135deg, #7c3aed, #4c1d95); }
         .pdf-btn { background: linear-gradient(135deg, #e11d48, #9f1239); }
         .clear-btn { background-color: transparent; border: 1px solid rgba(239,68,68,0.4); color: #ef4444; grid-column: span 2; padding: 8px; font-size: 10px; font-weight: bold; }
-
         .dashboard-section { background: var(--card-bg); border-radius: var(--border-radius); padding: 12px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .chart-container { position: relative; width: 100%; height: 210px; margin-top: 6px; }
         .log-box { background-color: #020617; border-radius: 10px; padding: 8px; max-height: 120px; overflow-y: auto; font-family: monospace; font-size: 10px; color: #38bdf8; margin-top: 6px; }
         .log-entry { margin-bottom: 3px; border-bottom: 1px dashed #1e293b; padding-bottom: 3px; }
-
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; padding: 15px; }
         .modal-box { background-color: #1e293b; border-radius: var(--border-radius); width: 100%; max-width: 450px; padding: 16px; border: 2px solid var(--accent-color); display: flex; flex-direction: column; }
         .modal-textarea { width: 100%; height: 180px; background-color: #020617; color: #fff; border: 1px solid #475569; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 11px; resize: none; user-select: text!important; -webkit-user-select: text!important; }
@@ -143,7 +81,6 @@
     </style>
 </head>
 <body>
-
     <div id="pdf-container">
         <header><h1>🏆 Feeder Trener PRO v4.5 – PANEL SEKTOROWY</h1></header>
         <div class="meta-panel">
@@ -161,7 +98,6 @@
                 </div>
             </div>
         </div>
-
         <div class="grid-container">
             <div class="sector-column left">
                 <div class="column-header">Sąsiad LEWY</div>
@@ -194,7 +130,6 @@
                 </div>
                 <div class="note-area"><input type="text" id="left-note-input" placeholder="Notatka..."><button onclick="saveCustomNote('left')">OK</button></div>
             </div>
-
             <div class="sector-column me">
                 <div class="column-header">ZAWODNICZKA</div>
                 <div class="counter-section">
@@ -226,7 +161,6 @@
                 </div>
                 <div class="note-area"><input type="text" id="me-note-input" placeholder="Notatka..."><button onclick="saveCustomNote('me')">OK</button></div>
             </div>
-
             <div class="sector-column right">
                 <div class="column-header">Sąsiad PRAWY</div>
                 <div class="counter-section">
@@ -264,7 +198,6 @@
             <div class="chart-container"><canvas id="fishChart"></canvas></div>
         </div>
     </div>
-
     <div class="action-container">
         <button class="action-btn messenger-btn" onclick="generateMessengerRaport()">💬 POBIERZ RAPORT NA MESSENGERA</button>
         <button class="action-btn gemini-btn" onclick="exportToGemini()">🤖 EKSPORT LOGÓW DO GEMINI</button>
@@ -275,7 +208,6 @@
         <div class="section-title" style="color: var(--accent-color); font-size: 11px;">📋 Ostatnie logi zdarzeń</div>
         <div class="log-box" id="log-box-container"><div class="log-entry">System gotowy. Wersja 4.5 Sztab Aktywna.</div></div>
     </div>
-
     <div class="modal-overlay" id="copyModal">
         <div class="modal-box">
             <div class="section-title" id="modalTitle" style="color:var(--accent-color)">Kopiowanie</div>
@@ -283,7 +215,6 @@
             <button class="modal-close-btn" onclick="closeModal()">ZAMKNIJ</button>
         </div>
     </div>
-
     <script>
         let dataStore = {
             left: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] },
@@ -291,7 +222,6 @@
             right: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] }
         };
         let chartInstance = null; let raceTimer = null; let raceSeconds = 4 * 60 * 60; let totalDuration = 4 * 60 * 60; let isRaceActive = false; let wakeLock = null;
-        
         window.onload = function() {
             if(localStorage.getItem('mp_u20_v4_store')) {
                 dataStore = JSON.parse(localStorage.getItem('mp_u20_v4_store'));
@@ -307,7 +237,6 @@
         }
         async function requestWakeLock() { try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); } } catch (err) {} }
         function releaseWakeLock() { if (wakeLock !== null) { wakeLock.release(); wakeLock = null; } }
-        
         function toggleRaceTimers() {
             if (raceTimer) {
                 clearInterval(raceTimer); raceTimer = null; document.getElementById('timer-trigger-btn').innerText = '▶️ WZNAWIAJ TURĘ'; addLog('Czas wstrzymany.'); releaseWakeLock();
@@ -385,31 +314,39 @@
             document.getElementById('left-fish-count').innerText = dataStore.left.fishCount; document.getElementById('me-fish-count').innerText = dataStore.me.fishCount; document.getElementById('right-fish-count').innerText = dataStore.right.fishCount;
             ['left', 'me', 'right'].forEach(comp => {
                 document.querySelectorAll('.' + comp + '-method').forEach(btn => btn.classList.remove('active'));
-                let id = comp + '-m-' + (dataStore[comp].currentMethod === 'Odległość' ? 'odleglosc' : (dataStore[comp].currentMethod === 'Uklejówka' ? 'ukleja' : dataStore[comp].currentMethod.toLowerCase()));
-                if(document.getElementById(id)) document.getElementById(id).classList.add('active');
+                let m = dataStore[comp].currentMethod; let id = '';
+                if(m === 'Tyczka') id = comp + '-m-tyczka'; if(m === 'Bat') id = comp + '-m-bat';
+                if(m === 'Odległość') id = comp + '-m-odleglosc'; if(m === 'Uklejówka') id = comp + '-m-ukleja';
+                if(id && document.getElementById(id)) document.getElementById(id).classList.add('active');
             });
         }
         function generateMessengerRaport() {
-            let txt = '📊 RAPORT | ' + document.getElementById('meta-sector').value + ' | Stan. ' + document.getElementById('meta-stan').value + '\n';
-            ['left', 'me', 'right'].forEach(c => { txt += (c==='left'?'⬅️ LEWY: ': (c==='me'?'👧 JA: ':'➡️ PRAWY: ')) + dataStore[c].fishCount + ' szt. | Prog: ' + document.getElementById(c+'-stat-prog').innerText + '\n'; });
+            let txt = '📊 RAPORT SZYBKI | Sektor: ' + document.getElementById('meta-sector').value + ' | Stan. ' + document.getElementById('meta-stan').value + '\n';
+            txt += '-------------------------\n';
+            ['left', 'me', 'right'].forEach(c => {
+                let name = c === 'left' ? '⬅️ LEWY: ' : (c === 'me' ? '👧 JA: ' : '➡️ PRAWY: ');
+                txt += name + dataStore[c].fishCount + ' szt. | ' + document.getElementById(c + '-position-badge').innerText + ' | Prog: ' + document.getElementById(c + '-stat-prog').innerText + '\n';
+            });
+            txt += '-------------------------';
             showCopyModal('💬 Kopiuj raport na Messengera', txt);
         }
         function exportToGemini() {
-            let output = 'Cześć Gemini, przeanalizuj przebieg tury zawodów spławikowych U20.\n\n';
+            let output = 'Cześć Gemini, przeanalizuj przebieg tury zawodów spławikowych U20.\n';
+            output += 'Sektor: ' + document.getElementById('meta-sector').value + ', Stanowisko: ' + document.getElementById('meta-stan').value + '\n\n';
             ['left', 'me', 'right'].forEach(comp => {
-                output += '[LOGI DLA: ' + comp.toUpperCase() + ']\n';
-                dataStore[comp].events.forEach(ev => { output += ev.time + ' - Typ: ' + ev.type + ' | Stan: ' + (ev.value || ev.method || '') + ' | Stan ryb: ' + ev.count + '\n'; });
+                output += '\n[LOGI DLA: ' + comp.toUpperCase() + ']\n';
+                if(dataStore[comp].events.length === 0) output += 'Brak logów.\n';
+                dataStore[comp].events.forEach(ev => {
+                    output += ev.time + ' - Typ: ' + ev.type + ' | Metoda: ' + (ev.value || ev.method || '') + ' | Licznik ryb: ' + ev.count + '\n';
+                });
             });
             showCopyModal('🤖 Eksport danych do analizy AI', output);
         }
         function generatePDF() {
-            // Generowanie niezależnego, czystego widoku druku w nowym elemencie, aby uniknąć czarnego tła aplikacji
             const printElement = document.createElement('div');
             printElement.style.padding = '20px'; printElement.style.color = '#000'; printElement.style.background = '#fff'; printElement.style.fontFamily = 'Arial, sans-serif';
-            
-            let html = '<h1 style="text-align:center; margin-bottom:20px;">🏆 RAPORT TRENERA - PODSUMOWANIE TURY</h1>';
+            let html = '<h1 style="text-align:center; margin-bottom:20px;">🏆 RAPORT TRENERA - MP U20</h1>';
             html += '<p><strong>Sektor:</strong> ' + document.getElementById('meta-sector').value + ' | <strong>Stanowisko:</strong> ' + document.getElementById('meta-stan').value + '</p><br>';
-            
             html += '<table border="1" cellpadding="8" style="width:100%; border-collapse:collapse; text-align:center; margin-bottom:20px;">';
             html += '<tr style="background:#f2f2f2;"><th>Zawodnik</th><th>Wynik (szt)</th><th>Najlepsza metoda</th><th>Średnie tempo</th><th>Prognoza wagi</th></tr>';
             ['left', 'me', 'right'].forEach(c => {
@@ -417,22 +354,19 @@
                 html += '<tr><td>' + name + '</td><td><strong>' + dataStore[c].fishCount + '</strong></td><td>' + document.getElementById(c+'-stat-method').innerText + '</td><td>' + document.getElementById(c+'-stat-tempo').innerText + '</td><td>' + document.getElementById(c+'-stat-weight').innerText + '</td></tr>';
             });
             html += '</table><br>';
-            
             html += '<h3>📋 Chronologiczny log zdarzeń:</h3><div style="font-family:monospace; font-size:11px;">';
             let allLogs = [];
             ['left', 'me', 'right'].forEach(c => { dataStore[c].events.forEach(e => { allLogs.push({ time: e.time, text: (c==='left'?'Lewy':(c==='me'?'JA':'Prawy')) + ': ' + e.type + ' ' + (e.value || e.method || '') + ' (Stan: ' + e.count + ')' }); }); });
             allLogs.sort((a,b) => b.time.localeCompare(a.time));
             allLogs.forEach(l => { html += '[' + l.time + '] ' + l.text + '<br>'; });
             html += '</div>';
-            
             printElement.innerHTML = html;
-            
             const opt = { margin: 10, filename: 'Raport_Tura_' + document.getElementById('meta-sector').value + '.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, backgroundColor: '#ffffff' }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
             html2pdf().set(opt).from(printElement).save();
         }
-        function closeModal() { document.getElementById('copyModal').style.display = 'none'; }
+        function closeModal() { document.getElementById('copyModal').style.none; document.getElementById('copyModal').style.display = 'none'; }
         function resetData() {
-            if(confirm('Wyczyścić CAŁĄ aktualną turę?')) {
+            if(confirm('Wyczyścić całą turę? Stracisz zapisane logi i wykres.')) {
                 dataStore = { left: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] }, me: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] }, right: { fishCount: 0, currentMethod: 'Nieznana', lastBait: 'Brak', events: [] } };
                 localStorage.removeItem('mp_u20_v4_store'); if(raceTimer) { clearInterval(raceTimer); raceTimer = null; }
                 isRaceActive = false; document.getElementById('race-timer-text').innerText = '04:00:00'; document.getElementById('timer-progress-fill').style.width = '100%'; document.getElementById('log-box-container').innerHTML = '<div>Zresetowano.</div>';
